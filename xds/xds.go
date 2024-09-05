@@ -34,12 +34,14 @@ import (
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/internal"
 	internaladmin "google.golang.org/grpc/internal/admin"
+	iresolver "google.golang.org/grpc/internal/resolver"
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/xds/csds"
 
-	_ "google.golang.org/grpc/credentials/tls/certprovider/pemfile"           // Register the file watcher certificate provider plugin.
-	_ "google.golang.org/grpc/xds/internal/balancer"                          // Register the balancers.
-	_ "google.golang.org/grpc/xds/internal/clusterspecifier/rls"              // Register the RLS cluster specifier plugin. Note that this does not register the RLS LB policy.
+	_ "google.golang.org/grpc/credentials/tls/certprovider/pemfile" // Register the file watcher certificate provider plugin.
+	_ "google.golang.org/grpc/xds/internal/balancer"                // Register the balancers.
+	_ "google.golang.org/grpc/xds/internal/clusterspecifier/rls"    // Register the RLS cluster specifier plugin. Note that this does not register the RLS LB policy.
+	"google.golang.org/grpc/xds/internal/httpfilter"
 	_ "google.golang.org/grpc/xds/internal/httpfilter/fault"                  // Register the fault injection filter.
 	_ "google.golang.org/grpc/xds/internal/httpfilter/rbac"                   // Register the RBAC filter.
 	_ "google.golang.org/grpc/xds/internal/httpfilter/router"                 // Register the router filter.
@@ -97,3 +99,14 @@ func init() {
 func NewXDSResolverWithConfigForTesting(bootstrapConfig []byte) (resolver.Builder, error) {
 	return internal.NewXDSResolverWithConfigForTesting.(func([]byte) (resolver.Builder, error))(bootstrapConfig)
 }
+
+type HttpFilter = httpfilter.Filter
+type HttpFilterConfig = httpfilter.FilterConfig
+
+func RegisterHttpFilter(f HttpFilter) {
+	httpfilter.Register(f)
+}
+
+type ClientInterceptor = iresolver.ClientInterceptor
+type RPCInfo = iresolver.RPCInfo
+type ClientStream = iresolver.ClientStream
